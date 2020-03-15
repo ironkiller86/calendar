@@ -8,8 +8,9 @@
 
 import React from 'react';
 import Calendar from './Calendar';
-import {View, Text, StatusBar} from 'react-native';
-
+import {View} from 'react-native';
+const time = new Date(0, 0, 0, 16, 30).getTime();
+const date = new Date(2015, 9, 8, 12, 45).getTime();
 const App = () => {
   return (
     <View
@@ -19,8 +20,8 @@ const App = () => {
         justifyContent: 'center',
         flexDirection: 'row',
       }}>
-      <Calendar mode={'time'} />
-      <Calendar mode={'date'} />
+      <Calendar mode={'time'} /*defaultValue={time} */ />
+      <Calendar mode={'date'} /* defaultValue={date} */ />
     </View>
   );
 };

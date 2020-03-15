@@ -12,7 +12,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 /*
  * React native import
  */
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 /*
  * Local style import
  */
@@ -21,13 +21,18 @@ import styles from './styles';
  * Local layouts import
  */
 import layouts from './layouts';
+/*
+ * Import moment library
+ */
 import moment from 'moment';
-
+/**
+ *
+ * @param {*} props
+ */
 const Calendar = props => {
-  const [field, setField] = useState(new Date(1598051730000));
-
+  const {defaultValue, mode} = props;
+  const [field, setField] = useState(null);
   const [show, setShow] = useState(false);
-
   /**
    *
    * @param {*} mode
@@ -54,10 +59,42 @@ const Calendar = props => {
    * @param {*} event
    * @param {*} selectedDate
    */
-  const onChange = (event, selectedDate) => {
-    const currentDate = selectedDate || field;
-    setField(currentDate);
+  const onChange = (event, selectedField) => {
+    const currentField = selectedField || field;
+    setField(currentField);
     setShow(false);
+  };
+  /**
+   *
+   */
+  useEffect(() => {
+    console.log('Calendar useEffect', field);
+    console.log('Calendar useEffect props.defaultValue', defaultValue);
+    setField(defaultValue || new Date().getTime());
+  }, []);
+
+  const formatDate = () => {
+    if (mode && typeof mode === 'string') {
+      switch (mode) {
+        /*
+         *
+         */
+        case 'time':
+          console.log('formatDate -', mode);
+          return moment(field).format('HH:mm');
+        /*
+         *
+         */
+        case 'date':
+          console.log('formatDate -', mode);
+          return moment(field).format('DD/MM/YYYY');
+        /*
+         *
+         */
+        default:
+          console.log('Err Calendar type -', mode);
+      }
+    }
   };
   /*
    *
@@ -72,52 +109,19 @@ const Calendar = props => {
       </TouchableOpacity>
       <View style={[styles.textView, layouts.textView]}>
         <Text style={[styles.textSetting, layouts.textSetting]}>
-          {props.mode === 'time' && moment(field).format('HH:mm')}
-          {props.mode === 'date' && moment(field).format('DD/MM/YYYY')}
+          {formatDate()}
         </Text>
       </View>
       {show && (
         <DateTimePicker
           testID="dateTimePicker"
-          //timeZoneOffsetInMinutes={2}
           value={field}
-          mode={props.mode}
-          // is24Hour
+          mode={mode}
           display={'default'}
           onChange={onChange}
-          // style={styles.iOsPicker}
         />
       )}
     </View>
-
-    /* <>
-      <View testID="appRootView" style={styles.container}>
-        <View style={styles.button}>
-          <Button
-            testID="datePickerButton"
-            onPress={showDatepicker}
-            title="Show date time picker default!"
-          />
-        </View>
-
-        <View style={styles.header}>
-          <Text testID="dateTimeText" style={styles.dateTimeText}>
-            {mode === 'time' && moment.utc(date).format('HH:mm')}
-            {mode === 'date' && moment.utc(date).format('MM/DD/YYYY')}
-          </Text>
-        </View>
-        {show && (
-          <DateTimePicker
-            testID="dateTimePicker"
-            timeZoneOffsetInMinutes={0}
-            value={date}
-            mode={mode}
-            is24Hour
-            display={display}
-            onChange={onChange}
-            style={styles.iOsPicker}
-          />currentMode
-    </>*/
   );
 };
 
