@@ -1,18 +1,12 @@
 /*
  * React imports
  */
-import {
-  View,
-  Text,
-  Image,
-  ImageBackground,
-  TouchableOpacity,
-} from 'react-native';
+import {View, Text, ImageBackground, TouchableOpacity} from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 /*
  * React native import
  */
-import React, {useState, useEffect} from 'react';
+import React from 'react';
 /*
  * Local style import
  */
@@ -27,102 +21,107 @@ import layouts from './layouts';
 import moment from 'moment';
 /**
  *
- * @param {*} props
  */
-const Calendar = props => {
-  const {defaultValue, mode} = props;
-  const [field, setField] = useState(null);
-  const [show, setShow] = useState(false);
-  /**
-   *
-   * @param {*} mode
-   */
-  const constrolImageProps = mode => {
-    if (mode && typeof mode === 'string') {
-      if (mode === 'date') {
-        return styles.calendarPath;
-      } else if (mode === 'time') {
-        return styles.timePath;
-      }
-    } else {
-      return null;
-    }
-  };
+class Calendar extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      mode: '',
+      date: new Date().getTime(),
+      show: false,
+    };
+  }
   /*
    *
    */
-  const showMode = () => {
-    setShow(true);
-  };
-  /*
-   *
-   * @param {*} event
-   * @param {*} selectedDate
-   */
-  const onChange = (event, selectedField) => {
-    const currentField = selectedField || field;
-    setField(currentField);
-    setShow(false);
+  activePicker = mode => {
+    this.setState({mode: mode, show: true});
   };
   /**
    *
    */
-  useEffect(() => {
-    console.log('Calendar useEffect', field);
-    console.log('Calendar useEffect props.defaultValue', defaultValue);
-    setField(defaultValue || new Date().getTime());
-  }, []);
-
-  const formatDate = () => {
-    if (mode && typeof mode === 'string') {
-      switch (mode) {
-        /*
-         *
-         */
-        case 'time':
-          console.log('formatDate -', mode);
-          return moment(field).format('HH:mm');
-        /*
-         *
-         */
-        case 'date':
-          console.log('formatDate -', mode);
-          return moment(field).format('DD/MM/YYYY');
-        /*
-         *
-         */
-        default:
-          console.log('Err Calendar type -', mode);
-      }
+  componentDidMount() {
+    console.log('Calendar -  componentDidMount');
+    const defaultDate = this.props.defaultDate || null;
+    if (defaultDate) {
+      console.log('Calendar -  componentDidMount dentro if');
+      // eslint-disable-next-line react/no-did-mount-set-state
+      this.setState({date: defaultDate});
     }
-  };
-  /*
+  }
+  /**
    *
    */
-  return (
-    <View style={[styles.container, layouts.container]}>
-      <TouchableOpacity onPress={showMode}>
-        <ImageBackground
-          source={constrolImageProps(props.mode)}
-          style={[styles.icon, layouts.icon]}
-        />
-      </TouchableOpacity>
-      <View style={[styles.textView, layouts.textView]}>
-        <Text style={[styles.textSetting, layouts.textSetting]}>
-          {formatDate()}
-        </Text>
+  onChange = (event, selectedField) => {
+    selectedField = new Date(selectedField).getTime();
+    this.setState({
+      date: selectedField,
+      show: false,
+    });
+  };
+  componentDidUpdate() {
+    console.log('Calendar - componentDidUpdate');
+    console.log('Calendar - componentDidUpdate', this.state);
+    this.props.getDate(this.state.date);
+  }
+  /**
+   *
+   */
+  render() {
+    console.log('Calendar - render');
+    const {mode, date, show} = this.state;
+    return (
+      <View style={[styles.container, layouts.container]}>
+        <View style={[styles.dataTimeField, layouts.dataTimeField]}>
+          <TouchableOpacity
+            onPress={() => {
+              this.activePicker('date');
+            }}>
+            <ImageBackground
+              source={styles.calendarPath}
+              style={[styles.icon, layouts.icon]}
+            />
+          </TouchableOpacity>
+          <View style={[styles.textView, layouts.textView]}>
+            <Text style={[styles.textSetting, layouts.textSetting]}>
+              {moment(date).format('DD/MM/YYYY')}
+            </Text>
+          </View>
+        </View>
+        <View style={[styles.dataTimeField, layouts.dataTimeField]}>
+          <TouchableOpacity
+            onPress={() => {
+              this.activePicker('time');
+            }}>
+            <ImageBackground
+              source={styles.timePath}
+              style={[styles.icon, layouts.icon]}
+            />
+          </TouchableOpacity>
+          <View style={[styles.textView, layouts.textView]}>
+            <Text style={[styles.textSetting, layouts.textSetting]}>
+              {moment(date).format('HH:mm')}
+            </Text>
+          </View>
+        </View>
+        {show && (
+          <DateTimePicker
+            locale="it-IT"
+            maximumDate={new Date(2100, 10, 20)}
+            minimumDate={new Date(2020, 0, 1)}
+            value={date}
+            mode={mode}
+            display={'default'}
+            onChange={this.onChange}
+            is24Hour={true}
+            timeZoneOffsetInMinutes={60}
+          />
+        )}
       </View>
-      {show && (
-        <DateTimePicker
-          testID="dateTimePicker"
-          value={field}
-          mode={mode}
-          display={'default'}
-          onChange={onChange}
-        />
-      )}
-    </View>
-  );
-};
-
+    );
+  }
+}
+/*
+ *
+ */
 export default Calendar;
